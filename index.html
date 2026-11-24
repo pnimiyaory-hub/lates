@@ -320,7 +320,7 @@ svg text{font-family:var(--f-body)}
 #toast.on{opacity:1;transform:translate(-50%,0)}#toast.err{background:var(--bad);color:#fff}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .cc{display:none}
-@media (max-width:700px){.tw{display:none}.cc{display:flex;flex-direction:column;gap:10px}}
+@media (max-width:700px){.tw.hc{display:none}.cc{display:flex;flex-direction:column;gap:10px}}
 @media (max-width:560px){.cards{grid-template-columns:1fr}.tab{padding:9px 12px}.kpi b{font-size:28px}}
 .dwrap{display:flex;flex-direction:column;gap:4px}
 .hdl{font-size:13px;color:var(--accent);font-weight:600;min-height:1.2em}
@@ -610,7 +610,7 @@ function vCare(){
   <select data-ch="ret"><option value="">כל החזרות</option>${rets.map(r=>`<option value="${r.id}" ${V.ret===r.id?'selected':''}>${esc(retLabel(r))}</option>`).join('')}</select>
   <select data-ch="cls"><option value="">כל השיעורים</option>${cfg.classes.map(c=>`<option ${V.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
   <button class="btn" data-act="exportView">ייצוא התצוגה לאקסל</button></div>
-  ${a.length?`<div class="tw"><table><thead><tr>${w?`<th><input type="checkbox" data-act="selAll" ${allSel?'checked':''} title="בחר הכול"></th>`:''}<th>בחור</th><th class="n">שיעור</th><th>חזרה</th><th class="n">איחור</th><th class="n">דרגה</th><th>טיפול נדרש</th><th class="n">מכתב</th><th>מטלה</th><th class="n">בוצעה</th><th class="n">סטטוס</th></tr></thead><tbody>${rows}</tbody></table></div><div class="cc">${a.slice(0,150).map(x=>lateCard(x,w)).join('')}</div>`:'<div class="empty">אין איחורים בתצוגה הזו</div>'}
+  ${a.length?`<div class="tw hc"><table><thead><tr>${w?`<th><input type="checkbox" data-act="selAll" ${allSel?'checked':''} title="בחר הכול"></th>`:''}<th>בחור</th><th class="n">שיעור</th><th>חזרה</th><th class="n">איחור</th><th class="n">דרגה</th><th>טיפול נדרש</th><th class="n">מכתב</th><th>מטלה</th><th class="n">בוצעה</th><th class="n">סטטוס</th></tr></thead><tbody>${rows}</tbody></table></div><div class="cc">${a.slice(0,150).map(x=>lateCard(x,w)).join('')}</div>`:'<div class="empty">אין איחורים בתצוגה הזו</div>'}
   ${w&&sel.size?`<div class="bulk"><b>${sel.size} נבחרו</b><button class="btn pri" data-act="bulkLetter">✉ מכתב נשלח</button><button class="btn pri" data-act="bulkDone">✔ בוצעה</button><button class="btn" data-act="bulkLetters">📄 מכתבים</button><button class="btn" data-act="bulkTask">קבע מטלה</button><button class="btn" data-act="selClear">נקה</button></div>`:''}`}
 
 function stuStatus(sid){const o=dv().stu.get(sid);if(!o||!o.tot)return{t:'ללא איחור',c:'hist',lv:0};if(!o.cnt)return{t:'היסטוריה בלבד ('+o.hist+')',c:'hist',lv:0};return{t:'איחור '+o.cnt,c:o.cnt>=2?'bad':'wait',lv:o.cnt}}
@@ -1536,7 +1536,9 @@ function bind(){
   app.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.in;if(k&&INP[k])INP[k](e.target)});
   app.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.ch;if(k&&CHG[k])CHG[k](e.target)});
 }
-function sub(name,cb){db.collection(name).onSnapshot(snap=>{cb(snap.docs.map(d=>Object.assign({id:d.id},d.data())));dirty();render()},e=>console.warn(name,e))}
+function sub(name,cb){db.collection(name).onSnapshot(snap=>{cb(snap.docs.map(d=>Object.assign({id:d.id},d.data())));dirty();render()},e=>{console.warn(name,e);loadErr(name,e)})}
+function loadErr(n,e){try{let b=document.getElementById('lerr');if(!b){b=document.createElement('div');b.id='lerr';b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:95;background:#b3261e;color:#fff;padding:10px 14px;font-weight:700;text-align:center;font-size:15px';document.body.appendChild(b)}
+  b.textContent='שגיאה בטעינת הנתונים ('+n+': '+((e&&(e.code||e.message))||'')+'). רענן את הדף. אם זה חוזר, צלם את המסך ושלח.'}catch(_){}}
 async function init(){
   try{db=await claude.use('db');user=await claude.use('user');dl=await claude.use('downloads')}catch(e){}
   const app=$('#app');
